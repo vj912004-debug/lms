@@ -69,7 +69,6 @@ function TasksPage() {
 
   return (
     <>
-    <>
       <div style={{ 
         padding: 'clamp(16px, 4vw, 32px)', 
         minHeight: 'calc(100vh - 70px)', 
