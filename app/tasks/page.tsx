@@ -69,25 +69,39 @@ function TasksPage() {
 
   return (
     <>
-      <div style={{ padding: '32px', height: 'calc(100vh - 70px)', display: 'flex', gap: '32px' }}>
+    <>
+      <div style={{ 
+        padding: 'clamp(16px, 4vw, 32px)', 
+        minHeight: 'calc(100vh - 70px)', 
+        display: 'flex', 
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: '24px' 
+      }}>
         {/* Calendar Sidebar */}
-        <div style={{ width: '400px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <div className="glass-card" style={{ padding: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ fontWeight: 700 }}>{format(currentMonth, "MMMM yyyy")}</h3>
+        <div style={{ 
+          width: '100%', 
+          maxWidth: '400px', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '24px' 
+        }}>
+          <div className="glass-card" style={{ padding: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontWeight: 700, fontSize: '16px' }}>{format(currentMonth, "MMMM yyyy")}</h3>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="icon-btn-sm"><ChevronLeft size={16} /></button>
                 <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="icon-btn-sm"><ChevronRight size={16} /></button>
               </div>
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px', textAlign: 'center', marginBottom: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', textAlign: 'center', marginBottom: '12px' }}>
               {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
-                <span key={d} style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>{d}</span>
+                <span key={d} style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>{d}</span>
               ))}
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}>
               {days.map(day => {
                 const hasTasks = tasks.some(t => t.dueDate && isSameDay(new Date(t.dueDate), day));
                 const isSelected = isSameDay(day, selectedDate);
@@ -98,12 +112,12 @@ function TasksPage() {
                     key={day.toString()}
                     onClick={() => setSelectedDate(day)}
                     style={{
-                      height: '40px',
+                      height: '36px',
                       border: 'none',
-                      borderRadius: '10px',
+                      borderRadius: '8px',
                       background: isSelected ? 'var(--primary)' : isToday ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
                       color: isSelected ? 'white' : isToday ? 'var(--primary)' : 'white',
-                      fontSize: '14px',
+                      fontSize: '13px',
                       fontWeight: isSelected || isToday ? 700 : 400,
                       cursor: 'pointer',
                       position: 'relative',
@@ -112,7 +126,7 @@ function TasksPage() {
                   >
                     {format(day, "d")}
                     {hasTasks && !isSelected && (
-                      <div style={{ position: 'absolute', bottom: '6px', left: '50%', transform: 'translateX(-50%)', width: '4px', height: '4px', borderRadius: '50%', background: 'var(--primary)' }} />
+                      <div style={{ position: 'absolute', bottom: '4px', left: '50%', transform: 'translateX(-50%)', width: '3px', height: '3px', borderRadius: '50%', background: 'var(--primary)' }} />
                     )}
                   </button>
                 );
@@ -120,21 +134,21 @@ function TasksPage() {
             </div>
           </div>
 
-          <div className="glass-card" style={{ padding: '24px', flex: 1, overflowY: 'auto' }}>
+          <div className="glass-card" style={{ padding: '20px', minHeight: '300px', flex: 1, overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ fontWeight: 700 }}>Upcoming</h3>
-              <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>Next 7 days</span>
+              <h3 style={{ fontWeight: 700, fontSize: '15px' }}>Upcoming</h3>
+              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>Next 7 days</span>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {tasks.filter(t => !t.completed).slice(0, 5).map(task => (
                 <div key={task.id} style={{ padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
                   <div style={{ display: 'flex', gap: '12px' }}>
                     <button onClick={() => toggleTask(task.id, false)} style={{ background: 'none', border: 'none', padding: 0, color: 'rgba(255,255,255,0.3)', cursor: 'pointer' }}>
-                      <Circle size={18} />
+                      <Circle size={16} />
                     </button>
                     <div>
-                      <div style={{ fontSize: '14px', fontWeight: 600 }}>{task.title}</div>
-                      <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>
+                      <div style={{ fontSize: '13px', fontWeight: 600 }}>{task.title}</div>
+                      <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>
                         {task.dueDate ? format(new Date(task.dueDate), "MMM d, h:mm a") : "No due date"}
                       </div>
                     </div>
@@ -146,52 +160,53 @@ function TasksPage() {
         </div>
 
         {/* Task List Main */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ flex: 1, minWidth: 'min(100%, 500px)', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
             <div>
-              <h1 style={{ fontSize: '28px', fontWeight: 800 }}>Tasks for {format(selectedDate, "MMM d, yyyy")}</h1>
-              <p style={{ color: 'rgba(255,255,255,0.5)' }}>Manage your follow-ups and meetings</p>
+              <h1 style={{ fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 800 }}>Tasks for {format(selectedDate, "MMM d, yyyy")}</h1>
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px' }}>Manage your follow-ups and meetings</p>
             </div>
-            <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-              <Plus size={18} /> Add Task
+            <button className="btn btn-primary" onClick={() => setIsModalOpen(true)} style={{ padding: '8px 16px', fontSize: '13px' }}>
+              <Plus size={16} /> Add Task
             </button>
           </div>
 
-          <div className="glass-card" style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+          <div className="glass-card" style={{ flex: 1, padding: 'clamp(20px, 5vw, 32px)', overflowY: 'auto', minHeight: '400px' }}>
             {tasksForSelectedDate.length === 0 ? (
-              <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.3)' }}>
-                <CalendarIcon size={48} style={{ marginBottom: '16px', opacity: 0.2 }} />
-                <p>No tasks scheduled for this day</p>
+              <div style={{ height: '300px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.3)' }}>
+                <CalendarIcon size={40} style={{ marginBottom: '16px', opacity: 0.2 }} />
+                <p style={{ fontSize: '14px' }}>No tasks scheduled for this day</p>
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {tasksForSelectedDate.map(task => (
                   <div 
                     key={task.id} 
                     style={{ 
-                      padding: '20px', 
-                      borderRadius: '16px', 
+                      padding: '16px', 
+                      borderRadius: '14px', 
                       background: 'rgba(255,255,255,0.02)', 
                       border: '1px solid rgba(255,255,255,0.05)',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '20px',
-                      opacity: task.completed ? 0.6 : 1
+                      gap: '16px',
+                      opacity: task.completed ? 0.6 : 1,
+                      flexWrap: 'wrap'
                     }}
                   >
                     <button 
                       onClick={() => toggleTask(task.id, task.completed)} 
                       style={{ background: 'none', border: 'none', padding: 0, color: task.completed ? '#10b981' : 'rgba(255,255,255,0.3)', cursor: 'pointer' }}
                     >
-                      {task.completed ? <CheckCircle2 size={24} /> : <Circle size={24} />}
+                      {task.completed ? <CheckCircle2 size={20} /> : <Circle size={20} />}
                     </button>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
-                        <h4 style={{ fontSize: '16px', fontWeight: 700, textDecoration: task.completed ? 'line-through' : 'none' }}>{task.title}</h4>
+                    <div style={{ flex: 1, minWidth: '200px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
+                        <h4 style={{ fontSize: '15px', fontWeight: 700, textDecoration: task.completed ? 'line-through' : 'none' }}>{task.title}</h4>
                         <span style={{ 
-                          fontSize: '10px', 
-                          padding: '2px 8px', 
-                          borderRadius: '10px', 
+                          fontSize: '9px', 
+                          padding: '2px 6px', 
+                          borderRadius: '8px', 
                           background: task.priority === 'HIGH' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255,255,255,0.05)',
                           color: task.priority === 'HIGH' ? '#ef4444' : 'rgba(255,255,255,0.5)',
                           fontWeight: 700
@@ -199,18 +214,18 @@ function TasksPage() {
                           {task.priority}
                         </span>
                       </div>
-                      <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)' }}>{task.description || "No description"}</p>
+                      <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>{task.description || "No description"}</p>
                       {task.lead && (
-                        <div style={{ marginTop: '12px', fontSize: '12px', color: 'var(--primary)', fontWeight: 600 }}>
-                          Lead: {task.lead.name} ({task.lead.company})
+                        <div style={{ marginTop: '8px', fontSize: '11px', color: 'var(--primary)', fontWeight: 600 }}>
+                          Lead: {task.lead.name}
                         </div>
                       )}
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end' }}>
-                        <Clock size={14} /> {task.dueDate ? format(new Date(task.dueDate), "h:mm a") : "All day"}
+                    <div style={{ textAlign: 'right', minWidth: '80px' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
+                        <Clock size={12} /> {task.dueDate ? format(new Date(task.dueDate), "h:mm a") : "All day"}
                       </div>
-                      <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginTop: '4px' }}>
+                      <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', marginTop: '2px' }}>
                         {task.type}
                       </div>
                     </div>
