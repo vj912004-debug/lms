@@ -110,19 +110,19 @@ export default function Dashboard() {
 
 
   return (
-    <div className="container" style={{ padding: '40px 0' }}>
+    <div className="container" style={{ padding: '32px 0' }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', flexWrap: 'wrap', gap: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h1 style={{ fontSize: '32px', fontWeight: 800, marginBottom: '4px' }}>Sales Overview</h1>
-          <p style={{ color: 'var(--text-muted)' }}>Welcome back! Here's what's happening with your leads today.</p>
+          <h1 style={{ fontSize: 'clamp(24px, 5vw, 32px)', fontWeight: 800, marginBottom: '4px' }}>Sales Overview</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Welcome back! Here's what's happening with your leads today.</p>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button className="btn btn-secondary">
-            <Filter size={18} /> Filter
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px' }}>
+            <Filter size={16} /> Filter
           </button>
-          <button className="btn btn-primary" onClick={() => setIsFormOpen(true)}>
-            <Plus size={18} /> Add Lead
+          <button className="btn btn-primary" style={{ padding: '8px 16px', fontSize: '13px' }} onClick={() => setIsFormOpen(true)}>
+            <Plus size={16} /> Add Lead
           </button>
         </div>
       </div>
@@ -182,7 +182,7 @@ export default function Dashboard() {
       {/* Charts & Lists */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', 
         gap: '24px' 
       }}>
         {/* Main Chart */}
