@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  phone     String?
+  role      String   @default("SALES") // ADMIN, MANAGER, SALES
+  permissions Json?    // Module-level access: { "leads": "RW", "reports": "R", etc. }
+  teamId    String?
+  team      Team?    @relation(fields: [teamId], references: [id])
+  leads     Lead[]   @relation("AssignedLeads")
+  assignments AssignmentHistory[] @relation("AssignedToHistory")
+  activities  ActivityLog[]
+  notifications Notification[]
+  tasks       Task[]   @relation("AssignedTasks")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  members   User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Lead {
+  id          String   @id @default(cuid())
+  name        String
+  email       String?
+  phone       String?
+  company     String?
+  source      String?  // e.g., "Facebook", "Website", "Referral"
+  score       Int      @default(0)
+  notes       String?
+  potential   Int      @default(0) // 0-100
+  statusId    String
+  status      PipelineStage @relation(fields: [statusId], references: [id])
+  followUpDate DateTime?
+  assignedTo  String?
+  agent       User?    @relation("AssignedLeads", fields: [assignedTo], references: [id])
+  tasks       Task[]
+  tags        Tag[]
+  documents   Document[]
+  assignmentHistory AssignmentHistory[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AssignmentHistory {
+  id         String   @id @default(cuid())
+  leadId     String
+  lead       Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  assignedTo String
+  agent      User     @relation("AssignedToHistory", fields: [assignedTo], references: [id])
+  assignedBy String?
+  createdAt  DateTime @default(now())
+}
+
+model PipelineStage {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  order     Int
+  color     String?
+  leads     Lead[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  dueDate     DateTime?
+  completed   Boolean  @default(false)
+  priority    String   @default("MEDIUM") // LOW, MEDIUM, HIGH
+  type        String   @default("FOLLOW_UP") // FOLLOW_UP, CALL, MEETING, EMAIL
+  leadId      String
+  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  assignedTo  String?
+  agent       User?    @relation("AssignedTasks", fields: [assignedTo], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Tag {
+  id    String @id @default(cuid())
+  name  String @unique
+  leads Lead[]
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  action      String   // CREATE, UPDATE, DELETE, LOGIN, etc.
+  targetType  String   // LEAD, USER, TASK, etc.
+  targetId    String?
+  details     String?  // JSON string of changes
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  message   String
+  type      String   @default("INFO") // INFO, WARNING, ERROR, SUCCESS
+  read      Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  name      String
+  url       String
+  type      String?  // PDF, DOCX, IMAGE, etc.
+  size      Int?     // in bytes
+  createdAt DateTime @default(now())
+}
+
+model SystemSettings {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   // Store as JSON string if complex
+  updatedAt DateTime @updatedAt
+}
+
