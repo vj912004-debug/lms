@@ -26,7 +26,7 @@ export default function Home() {
     <div className="container" style={{ paddingBottom: '100px' }}>
       {/* Hero Section */}
       <section style={{ 
-        padding: '120px 0 80px', 
+        padding: 'clamp(60px, 15vw, 120px) 0 60px', 
         textAlign: 'center',
         display: 'flex',
         flexDirection: 'column',
@@ -55,9 +55,9 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           style={{ 
-            fontSize: 'clamp(40px, 8vw, 84px)', 
+            fontSize: 'clamp(32px, 10vw, 72px)', 
             fontWeight: 800, 
-            lineHeight: 1.05,
+            lineHeight: 1.1,
             marginBottom: '24px',
             background: 'linear-gradient(to bottom, #fff, #94a3b8)',
             WebkitBackgroundClip: 'text',
@@ -74,10 +74,10 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
           style={{ 
-            fontSize: '20px', 
+            fontSize: 'clamp(16px, 4vw, 20px)', 
             color: 'var(--text-muted)', 
             maxWidth: '640px',
-            marginBottom: '48px',
+            marginBottom: '40px',
             lineHeight: 1.6
           }}
         >

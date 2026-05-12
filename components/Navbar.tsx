@@ -70,7 +70,7 @@ export default function Navbar() {
             }}>
               <BarChart3 size={22} />
             </div>
-            <span className="desktop-only">Lead<span style={{ color: 'var(--primary)' }}>Growth</span></span>
+            <span>Lead<span style={{ color: 'var(--primary)' }}>Growth</span></span>
           </Link>
           
           <div className="desktop-only" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -330,6 +330,23 @@ export default function Navbar() {
         }
         .logout-btn:hover {
           background: rgba(220, 38, 38, 0.2) !important;
+        }
+        
+        .desktop-only {
+          display: flex;
+          align-items: center;
+        }
+        .mobile-only {
+          display: none;
+        }
+
+        @media (max-width: 1024px) {
+          .desktop-only {
+            display: none !important;
+          }
+          .mobile-only {
+            display: flex !important;
+          }
         }
       `}</style>
     </nav>
