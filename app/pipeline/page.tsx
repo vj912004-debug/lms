@@ -48,15 +48,16 @@ export default function PipelinePage() {
   return (
     <div style={{ height: 'calc(100vh - 70px)', display: 'flex', flexDirection: 'column' }}>
       {/* Pipeline Header */}
-      <div style={{ padding: '32px 0', borderBottom: '1px solid var(--glass-border)' }}>
-        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+      {/* Pipeline Header */}
+      <div style={{ padding: '24px 0', borderBottom: '1px solid var(--glass-border)' }}>
+        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h1 style={{ fontSize: '28px', fontWeight: 800 }}>Lead Pipeline</h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Track your leads across the sales funnel.</p>
+            <h1 style={{ fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 800 }}>Lead Pipeline</h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Track your leads across the sales funnel.</p>
           </div>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-              <Plus size={18} /> New Lead
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button className="btn btn-primary" onClick={() => setIsModalOpen(true)} style={{ padding: '8px 16px', fontSize: '13px' }}>
+              <Plus size={16} /> New Lead
             </button>
           </div>
         </div>

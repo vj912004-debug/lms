@@ -89,12 +89,12 @@ export default function Home() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          style={{ display: 'flex', gap: '16px' }}
+          style={{ display: 'flex', gap: '16px', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}
         >
-          <Link href="/dashboard" className="btn btn-primary" style={{ padding: '16px 32px', fontSize: '16px' }}>
+          <Link href="/dashboard" className="btn btn-primary" style={{ padding: '16px 32px', fontSize: '16px', minWidth: '200px' }}>
             Get Started Free <ArrowRight size={18} />
           </Link>
-          <Link href="/pipeline" className="btn btn-secondary" style={{ padding: '16px 32px', fontSize: '16px' }}>
+          <Link href="/pipeline" className="btn btn-secondary" style={{ padding: '16px 32px', fontSize: '16px', minWidth: '200px' }}>
             View Demo
           </Link>
         </motion.div>
@@ -135,15 +135,15 @@ export default function Home() {
       </motion.div>
 
       {/* Features Grid */}
-      <section style={{ padding: '80px 0' }}>
-        <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-          <h2 style={{ fontSize: '40px', fontWeight: 800, marginBottom: '16px' }}>Everything you need to grow</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '18px' }}>Powerful features designed to optimize your entire sales cycle.</p>
+      <section style={{ padding: '60px 0' }}>
+        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+          <h2 style={{ fontSize: 'clamp(28px, 5vw, 40px)', fontWeight: 800, marginBottom: '16px' }}>Everything you need to grow</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '16px' }}>Powerful features designed to optimize your entire sales cycle.</p>
         </div>
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
-          gap: '24px' 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', 
+          gap: '20px' 
         }}>
           {features.map((feature, idx) => (
             <motion.div 
@@ -153,34 +153,34 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
               className="glass-card"
-              style={{ padding: '40px' }}
+              style={{ padding: '32px' }}
             >
               <div style={{ 
-                width: '52px', 
-                height: '52px', 
+                width: '48px', 
+                height: '48px', 
                 background: 'rgba(99, 102, 241, 0.1)', 
-                borderRadius: '14px',
+                borderRadius: '12px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: 'var(--primary)',
-                marginBottom: '24px'
+                marginBottom: '20px'
               }}>
                 {feature.icon}
               </div>
-              <h3 style={{ fontSize: '22px', marginBottom: '12px', fontWeight: 700 }}>{feature.title}</h3>
-              <p style={{ color: 'var(--text-muted)', lineHeight: 1.6, fontSize: '15px' }}>{feature.desc}</p>
+              <h3 style={{ fontSize: '20px', marginBottom: '12px', fontWeight: 700 }}>{feature.title}</h3>
+              <p style={{ color: 'var(--text-muted)', lineHeight: 1.6, fontSize: '14px' }}>{feature.desc}</p>
             </motion.div>
           ))}
         </div>
       </section>
 
       {/* Social Proof / Trusted By */}
-      <section style={{ padding: '100px 0', textAlign: 'center' }}>
-        <p style={{ color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '12px', fontWeight: 700, marginBottom: '40px' }}>Trusted by innovative teams worldwide</p>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '60px', opacity: 0.5, flexWrap: 'wrap' }}>
+      <section style={{ padding: '60px 0', textAlign: 'center' }}>
+        <p style={{ color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '12px', fontWeight: 700, marginBottom: '32px' }}>Trusted by innovative teams worldwide</p>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', opacity: 0.5, flexWrap: 'wrap' }}>
           {['TECHCORP', 'LOGIX', 'FINPLUS', 'INNOVATE', 'CLOUDSCALE'].map((logo) => (
-            <span key={logo} style={{ fontSize: '20px', fontWeight: 800, letterSpacing: '1px' }}>{logo}</span>
+            <span key={logo} style={{ fontSize: '16px', fontWeight: 800, letterSpacing: '1px' }}>{logo}</span>
           ))}
         </div>
       </section>

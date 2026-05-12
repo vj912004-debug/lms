@@ -47,15 +47,15 @@ export default function LeadsPage() {
   );
 
   return (
-    <div className="container" style={{ padding: '40px 0' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '20px' }}>
+    <div className="container" style={{ padding: '32px 0' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h1 style={{ fontSize: '28px', fontWeight: 800 }}>Lead Management</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>View and manage all your prospects in one place.</p>
+          <h1 style={{ fontSize: 'clamp(24px, 5vw, 32px)', fontWeight: 800 }}>Lead Management</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>View and manage all your prospects in one place.</p>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button className="btn btn-secondary"><Download size={18} /> Export</button>
-          <button className="btn btn-primary" onClick={() => setIsFormOpen(true)}><Plus size={18} /> Add New Lead</button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px' }}><Download size={16} /> Export</button>
+          <button className="btn btn-primary" style={{ padding: '8px 16px', fontSize: '13px' }} onClick={() => setIsFormOpen(true)}><Plus size={16} /> Add New Lead</button>
         </div>
       </div>
 
@@ -79,20 +79,22 @@ export default function LeadsPage() {
       </Modal>
 
 
-      <div className="glass-card" style={{ padding: '24px', marginBottom: '24px', display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-        <div style={{ position: 'relative', flex: 1, minWidth: '300px' }}>
-          <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', width: '18px' }} />
+      <div className="glass-card" style={{ padding: '20px', marginBottom: '24px', display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ position: 'relative', flex: 1, minWidth: 'min(100%, 300px)' }}>
+          <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', width: '16px' }} />
           <input 
             type="text" 
-            placeholder="Search by name, email or company..." 
+            placeholder="Search leads..." 
             className="input" 
-            style={{ paddingLeft: '44px' }}
+            style={{ paddingLeft: '40px', height: '44px' }}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <button className="btn btn-secondary"><Filter size={18} /> Status</button>
-        <button className="btn btn-secondary"><Filter size={18} /> Source</button>
+        <div style={{ display: 'flex', gap: '8px', width: 'auto' }}>
+          <button className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px' }}><Filter size={16} /> Status</button>
+          <button className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px' }}><Filter size={16} /> Source</button>
+        </div>
       </div>
 
       <div className="glass-card" style={{ overflowX: 'auto' }}>
