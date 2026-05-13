@@ -28,9 +28,14 @@ export default function Navbar() {
     { href: "/dashboard/settings", label: "Settings", roles: ["ADMIN"] },
   ].filter(link => !user || link.roles.includes(user.role));
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
     localStorage.removeItem("user");
-    window.location.href = "/login";
+    window.location.href = "/";
   };
 
   return (
