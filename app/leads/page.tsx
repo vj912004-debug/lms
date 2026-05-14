@@ -8,10 +8,12 @@ import {
   Plus, 
   Download,
   Mail,
-  Phone,
+  Phone, 
   BarChart3,
-  MessageSquare
+  MessageSquare,
+  Trash2
 } from "lucide-react";
+import toast from "react-hot-toast";
 import Modal from "@/components/Modal";
 import LeadForm from "@/components/LeadForm";
 import LeadDetail from "@/components/LeadDetail";
@@ -39,6 +41,21 @@ export default function LeadsPage() {
   useEffect(() => {
     fetchLeads();
   }, []);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this lead?")) return;
+    try {
+      const res = await fetch(`/api/leads/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        toast.success("Lead deleted successfully");
+        fetchLeads();
+      } else {
+        toast.error("Failed to delete lead");
+      }
+    } catch (error) {
+      toast.error("An error occurred");
+    }
+  };
 
   const filteredLeads = leads.filter(l => 
     l.name.toLowerCase().includes(search.toLowerCase()) || 
@@ -195,6 +212,17 @@ export default function LeadsPage() {
                         title="Email"
                       >
                         <Mail size={14} />
+                      </button>
+                      <button 
+                        className="icon-btn-table" 
+                        style={{ color: '#ef4444' }}
+                        onClick={(e) => { 
+                          e.stopPropagation(); 
+                          handleDelete(lead.id);
+                        }}
+                        title="Delete"
+                      >
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </td>

@@ -1,4 +1,4 @@
-import { Phone, Mail, Globe, MapPin, Calendar, Clock, Star, MessageSquare, UserPlus, Layers } from "lucide-react";
+import { Phone, Mail, Globe, MapPin, Calendar, Clock, Star, MessageSquare, UserPlus, Layers, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
@@ -144,6 +144,24 @@ export default function LeadDetail({ lead, onUpdate }: LeadDetailProps) {
     }
   };
 
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to delete this lead? This action cannot be undone.")) return;
+    try {
+      const response = await fetch(`/api/leads/${lead.id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        toast.success("Lead deleted successfully");
+        if (onUpdate) onUpdate();
+      } else {
+        toast.error("Failed to delete lead");
+      }
+    } catch (error) {
+      toast.error("An error occurred");
+    }
+  };
+
   if (!lead) return null;
 
   return (
@@ -270,6 +288,14 @@ export default function LeadDetail({ lead, onUpdate }: LeadDetailProps) {
             title="Email"
           >
             <Mail size={20} />
+          </button>
+          <button 
+            onClick={handleDelete}
+            className="icon-btn" 
+            style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}
+            title="Delete Lead"
+          >
+            <Trash2 size={20} />
           </button>
         </div>
 
