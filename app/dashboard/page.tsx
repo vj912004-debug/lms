@@ -61,6 +61,14 @@ export default function Dashboard() {
         fetch(`/api/stats?userId=${currentUser.id}&role=${currentUser.role}`)
       ]);
       
+      if (!leadsRes.ok || !statsRes.ok) {
+        if (leadsRes.status === 401 || statsRes.status === 401) {
+          window.location.href = "/login";
+          return;
+        }
+        throw new Error("Failed to fetch dashboard data");
+      }
+
       const leadsData = await leadsRes.json();
       const statsData = await statsRes.json();
       

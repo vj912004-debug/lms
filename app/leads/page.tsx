@@ -42,6 +42,10 @@ export default function LeadsPage() {
       if (search) params.append("query", search);
 
       const res = await fetch(`/api/leads/list?${params.toString()}`);
+      if (!res.ok) {
+        if (res.status === 401) window.location.href = "/login";
+        throw new Error("Failed to fetch leads");
+      }
       const data = await res.json();
       setLeads(data);
     } catch (error) {
@@ -57,6 +61,15 @@ export default function LeadsPage() {
         fetch("/api/users"),
         fetch("/api/pipeline")
       ]);
+
+      if (!agentsRes.ok || !stagesRes.ok) {
+        if (agentsRes.status === 401 || stagesRes.status === 401) {
+          window.location.href = "/login";
+          return;
+        }
+        throw new Error("Failed to fetch filters");
+      }
+
       const [agentsData, stagesData] = await Promise.all([
         agentsRes.json(),
         stagesRes.json()
