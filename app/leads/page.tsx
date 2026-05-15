@@ -22,6 +22,7 @@ export default function LeadsPage() {
   const [leads, setLeads] = useState<any[]>([]);
   const [agents, setAgents] = useState<any[]>([]);
   const [stages, setStages] = useState<any[]>([]);
+  const [user, setUser] = useState<any>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [search, setSearch] = useState("");
@@ -31,6 +32,18 @@ export default function LeadsPage() {
   const [filterAgent, setFilterAgent] = useState("");
   const [filterStage, setFilterStage] = useState("");
   const [filterSource, setFilterSource] = useState("");
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      // If user is sales, lock the filter to their ID
+      if (parsedUser.role === "SALES") {
+        setFilterAgent(parsedUser.id);
+      }
+    }
+  }, []);
 
   const fetchLeads = async () => {
     setLoading(true);
@@ -161,19 +174,21 @@ export default function LeadsPage() {
           />
         </div>
         <div style={{ display: 'flex', gap: '8px', width: 'auto', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--glass)', padding: '4px 12px', borderRadius: '10px', border: '1px solid var(--glass-border)' }}>
-            <Filter size={14} color="var(--text-muted)" />
-            <select 
-              value={filterAgent} 
-              onChange={(e) => setFilterAgent(e.target.value)}
-              style={{ background: 'none', border: 'none', color: 'white', fontSize: '13px', outline: 'none', cursor: 'pointer' }}
-            >
-              <option value="">All Salesmen</option>
-              {agents.map(agent => (
-                <option key={agent.id} value={agent.id} style={{ background: '#1e293b' }}>{agent.name}</option>
-              ))}
-            </select>
-          </div>
+          {user?.role !== "SALES" && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--glass)', padding: '4px 12px', borderRadius: '10px', border: '1px solid var(--glass-border)' }}>
+              <Filter size={14} color="var(--text-muted)" />
+              <select 
+                value={filterAgent} 
+                onChange={(e) => setFilterAgent(e.target.value)}
+                style={{ background: 'none', border: 'none', color: 'white', fontSize: '13px', outline: 'none', cursor: 'pointer' }}
+              >
+                <option value="">All Salesmen</option>
+                {agents.map(agent => (
+                  <option key={agent.id} value={agent.id} style={{ background: '#1e293b' }}>{agent.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--glass)', padding: '4px 12px', borderRadius: '10px', border: '1px solid var(--glass-border)' }}>
             <BarChart3 size={14} color="var(--text-muted)" />
@@ -207,7 +222,9 @@ export default function LeadsPage() {
           {(filterAgent || filterStage || filterSource || search) && (
             <button 
               onClick={() => {
-                setFilterAgent("");
+                if (user?.role !== "SALES") {
+                  setFilterAgent("");
+                }
                 setFilterStage("");
                 setFilterSource("");
                 setSearch("");

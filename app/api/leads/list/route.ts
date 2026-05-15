@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getSession, isAdmin, isManager } from "@/lib/auth";
 
 export async function GET(req: Request) {
   try {
+    const session = getSession(req);
+    if (!session) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
     const { searchParams } = new URL(req.url);
     const assignedTo = searchParams.get("assignedTo");
     const statusId = searchParams.get("statusId");
@@ -11,7 +17,15 @@ export async function GET(req: Request) {
 
     const where: any = {};
 
-    if (assignedTo) where.assignedTo = assignedTo;
+    // Role-based filtering
+    if (!isAdmin(session.role) && !isManager(session.role)) {
+      // Sales agents can only see their own leads
+      where.assignedTo = session.userId;
+    } else {
+      // Admins and Managers can filter by assignedTo
+      if (assignedTo) where.assignedTo = assignedTo;
+    }
+
     if (statusId) where.statusId = statusId;
     if (source) where.source = source;
     if (query) {

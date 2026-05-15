@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getSession, isAdmin, isManager } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -92,9 +93,23 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const session = getSession(req);
+    if (!session) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const where: any = {};
+
+    // Role-based filtering
+    if (!isAdmin(session.role) && !isManager(session.role)) {
+      // Sales agents can only see their own leads
+      where.assignedTo = session.userId;
+    }
+
     const leads = await prisma.lead.findMany({
+      where,
       include: { 
         status: true, 
         agent: true, 

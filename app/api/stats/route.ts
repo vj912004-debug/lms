@@ -1,13 +1,22 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getSession, isAdmin, isManager } from "@/lib/auth";
 
 export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-    const role = searchParams.get("role");
+    const session = getSession(req);
+    if (!session) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
 
-    const whereClause = (role === "SALES" && userId) ? { assignedTo: userId } : {};
+    const { searchParams } = new URL(req.url);
+    const userId = session.userId;
+    const role = session.role;
+
+    const whereClause: any = {};
+    if (!isAdmin(role) && !isManager(role)) {
+      whereClause.assignedTo = userId;
+    }
 
     // 1. Core Summary Stats
     const totalLeads = await prisma.lead.count({ where: whereClause });

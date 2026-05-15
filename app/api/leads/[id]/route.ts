@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { getSession, isAdmin, isManager } from "@/lib/auth";
 
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = getSession(req);
+    if (!session) return new NextResponse("Unauthorized", { status: 401 });
+
     const { id } = await params;
     const lead = await prisma.lead.findUnique({
       where: { id },
@@ -20,6 +23,11 @@ export async function GET(
 
     if (!lead) {
       return new NextResponse("Not Found", { status: 404 });
+    }
+
+    // Role check
+    if (!isAdmin(session.role) && !isManager(session.role) && lead.assignedTo !== session.userId) {
+      return new NextResponse("Forbidden", { status: 403 });
     }
 
     return NextResponse.json(lead);
@@ -38,6 +46,20 @@ export async function PATCH(
     if (!session) return new NextResponse("Unauthorized", { status: 401 });
 
     const { id } = await params;
+    
+    // First, check if lead exists and if user has permission
+    const existingLead = await prisma.lead.findUnique({
+      where: { id }
+    });
+
+    if (!existingLead) {
+      return new NextResponse("Not Found", { status: 404 });
+    }
+
+    if (!isAdmin(session.role) && !isManager(session.role) && existingLead.assignedTo !== session.userId) {
+      return new NextResponse("Forbidden", { status: 403 });
+    }
+
     const { 
       name, email, phone, company, source, notes, statusId, assignedTo, followUpDate 
     } = await req.json();
@@ -52,7 +74,7 @@ export async function PATCH(
         source,
         notes,
         statusId,
-        assignedTo,
+        assignedTo: (isAdmin(session.role) || isManager(session.role)) ? assignedTo : existingLead.assignedTo,
         followUpDate: followUpDate ? new Date(followUpDate) : undefined,
       } as any,
       include: {
@@ -87,7 +109,24 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = getSession(req);
+    if (!session) return new NextResponse("Unauthorized", { status: 401 });
+
     const { id } = await params;
+
+    // Check permission
+    const existingLead = await prisma.lead.findUnique({
+      where: { id }
+    });
+
+    if (!existingLead) {
+      return new NextResponse("Not Found", { status: 404 });
+    }
+
+    if (!isAdmin(session.role) && !isManager(session.role) && existingLead.assignedTo !== session.userId) {
+      return new NextResponse("Forbidden", { status: 403 });
+    }
+
     await prisma.lead.delete({
       where: { id },
     });
