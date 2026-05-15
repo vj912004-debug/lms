@@ -20,15 +20,28 @@ import LeadDetail from "@/components/LeadDetail";
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<any[]>([]);
+  const [agents, setAgents] = useState<any[]>([]);
+  const [stages, setStages] = useState<any[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  
+  // Filter states
+  const [filterAgent, setFilterAgent] = useState("");
+  const [filterStage, setFilterStage] = useState("");
+  const [filterSource, setFilterSource] = useState("");
 
   const fetchLeads = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/leads/list");
+      const params = new URLSearchParams();
+      if (filterAgent) params.append("assignedTo", filterAgent);
+      if (filterStage) params.append("statusId", filterStage);
+      if (filterSource) params.append("source", filterSource);
+      if (search) params.append("query", search);
+
+      const res = await fetch(`/api/leads/list?${params.toString()}`);
       const data = await res.json();
       setLeads(data);
     } catch (error) {
@@ -38,9 +51,33 @@ export default function LeadsPage() {
     }
   };
 
+  const fetchFilters = async () => {
+    try {
+      const [agentsRes, stagesRes] = await Promise.all([
+        fetch("/api/users"),
+        fetch("/api/pipeline")
+      ]);
+      const [agentsData, stagesData] = await Promise.all([
+        agentsRes.json(),
+        stagesRes.json()
+      ]);
+      setAgents(agentsData);
+      setStages(stagesData);
+    } catch (error) {
+      console.error("Failed to fetch filters", error);
+    }
+  };
+
   useEffect(() => {
-    fetchLeads();
+    fetchFilters();
   }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchLeads();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [filterAgent, filterStage, filterSource, search]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this lead?")) return;
@@ -57,11 +94,7 @@ export default function LeadsPage() {
     }
   };
 
-  const filteredLeads = leads.filter(l => 
-    l.name.toLowerCase().includes(search.toLowerCase()) || 
-    l.email?.toLowerCase().includes(search.toLowerCase()) ||
-    l.company?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredLeads = leads; // Filtering now handled by API
 
   return (
     <div className="container" style={{ padding: '32px 0' }}>
@@ -107,16 +140,70 @@ export default function LeadsPage() {
           <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', width: '16px' }} />
           <input 
             type="text" 
-            placeholder="Search leads..." 
+            placeholder="Search name, email or company..." 
             className="input" 
             style={{ paddingLeft: '40px', height: '44px' }}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div style={{ display: 'flex', gap: '8px', width: 'auto' }}>
-          <button className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px' }}><Filter size={16} /> Status</button>
-          <button className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px' }}><Filter size={16} /> Source</button>
+        <div style={{ display: 'flex', gap: '8px', width: 'auto', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--glass)', padding: '4px 12px', borderRadius: '10px', border: '1px solid var(--glass-border)' }}>
+            <Filter size={14} color="var(--text-muted)" />
+            <select 
+              value={filterAgent} 
+              onChange={(e) => setFilterAgent(e.target.value)}
+              style={{ background: 'none', border: 'none', color: 'white', fontSize: '13px', outline: 'none', cursor: 'pointer' }}
+            >
+              <option value="">All Salesmen</option>
+              {agents.map(agent => (
+                <option key={agent.id} value={agent.id} style={{ background: '#1e293b' }}>{agent.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--glass)', padding: '4px 12px', borderRadius: '10px', border: '1px solid var(--glass-border)' }}>
+            <BarChart3 size={14} color="var(--text-muted)" />
+            <select 
+              value={filterStage} 
+              onChange={(e) => setFilterStage(e.target.value)}
+              style={{ background: 'none', border: 'none', color: 'white', fontSize: '13px', outline: 'none', cursor: 'pointer' }}
+            >
+              <option value="">All Stages</option>
+              {stages.map(stage => (
+                <option key={stage.id} value={stage.id} style={{ background: '#1e293b' }}>{stage.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--glass)', padding: '4px 12px', borderRadius: '10px', border: '1px solid var(--glass-border)' }}>
+            <Search size={14} color="var(--text-muted)" />
+            <select 
+              value={filterSource} 
+              onChange={(e) => setFilterSource(e.target.value)}
+              style={{ background: 'none', border: 'none', color: 'white', fontSize: '13px', outline: 'none', cursor: 'pointer' }}
+            >
+              <option value="">All Sources</option>
+              <option value="Facebook" style={{ background: '#1e293b' }}>Facebook</option>
+              <option value="Website" style={{ background: '#1e293b' }}>Website</option>
+              <option value="Referral" style={{ background: '#1e293b' }}>Referral</option>
+              <option value="Manual Entry" style={{ background: '#1e293b' }}>Manual Entry</option>
+            </select>
+          </div>
+
+          {(filterAgent || filterStage || filterSource || search) && (
+            <button 
+              onClick={() => {
+                setFilterAgent("");
+                setFilterStage("");
+                setFilterSource("");
+                setSearch("");
+              }}
+              style={{ background: 'none', border: 'none', color: 'var(--error)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', padding: '0 8px' }}
+            >
+              Clear All
+            </button>
+          )}
         </div>
       </div>
 
