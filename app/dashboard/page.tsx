@@ -89,30 +89,34 @@ export default function Dashboard() {
     { 
       label: user?.role === "SALES" ? "My Leads" : "Total Leads", 
       value: statsData?.summary.totalLeads.toLocaleString() || "0", 
-      trend: "+0%", 
+      trend: statsData?.trends.leadsTrend || "+0%", 
       icon: <Users size={20} />, 
-      color: "var(--primary)" 
+      color: "var(--primary)",
+      href: "/leads"
     },
     { 
       label: "Conversion Rate", 
       value: `${statsData?.summary.conversionRate || 0}%`, 
-      trend: "+0%", 
+      trend: statsData?.trends.conversionTrend || "+0%", 
       icon: <Target size={20} />, 
-      color: "var(--success)" 
+      color: "var(--success)",
+      href: "/dashboard/reports"
     },
     { 
       label: user?.role === "SALES" ? "My Potential" : "Total Potential", 
-      value: `$${(statsData?.summary.currentRevenue || 0).toLocaleString()}`, 
-      trend: "0%", 
+      value: `$${(statsData?.summary.activePotential || 0).toLocaleString()}`, 
+      trend: statsData?.trends.revenueTrend || "0%", 
       icon: <TrendingUp size={20} />, 
-      color: "var(--accent)" 
+      color: "var(--accent)",
+      href: "/pipeline"
     },
     { 
       label: user?.role === "SALES" ? "My Tasks" : "Active Agents", 
       value: user?.role === "SALES" ? (statsData?.myTasksCount || 0).toString() : "2", 
-      trend: "Stable", 
+      trend: statsData?.trends.tasksTrend || "Stable", 
       icon: <Clock size={20} />, 
-      color: "var(--error)" 
+      color: "var(--error)",
+      href: "/leads"
     },
   ];
 
@@ -158,38 +162,40 @@ export default function Dashboard() {
         marginBottom: '40px'
       }}>
         {stats.map((stat, idx) => (
-          <motion.div 
-            key={idx}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.1 }}
-            className="glass-card"
-            style={{ padding: '24px' }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <div style={{ 
-                width: '40px', 
-                height: '40px', 
-                borderRadius: '10px', 
-                background: `${stat.color}15`, 
-                color: stat.color,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                {stat.icon}
+          <Link href={stat.href} key={idx} style={{ textDecoration: 'none', color: 'inherit' }}>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+              whileHover={{ y: -5, transition: { duration: 0.2 } }}
+              className="glass-card"
+              style={{ padding: '24px', cursor: 'pointer' }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+                <div style={{ 
+                  width: '40px', 
+                  height: '40px', 
+                  borderRadius: '10px', 
+                  background: `${stat.color}15`, 
+                  color: stat.color,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  {stat.icon}
+                </div>
+                <span style={{ 
+                  fontSize: '12px', 
+                  fontWeight: 600, 
+                  color: stat.trend.startsWith('+') ? 'var(--success)' : 'var(--error)' 
+                }}>
+                  {stat.trend}
+                </span>
               </div>
-              <span style={{ 
-                fontSize: '12px', 
-                fontWeight: 600, 
-                color: stat.trend.startsWith('+') ? 'var(--success)' : 'var(--error)' 
-              }}>
-                {stat.trend}
-              </span>
-            </div>
-            <h3 style={{ fontSize: '28px', fontWeight: 700, marginBottom: '4px' }}>{stat.value}</h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>{stat.label}</p>
-          </motion.div>
+              <h3 style={{ fontSize: '28px', fontWeight: 700, marginBottom: '4px' }}>{stat.value}</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>{stat.label}</p>
+            </motion.div>
+          </Link>
         ))}
       </div>
 
@@ -264,7 +270,7 @@ export default function Dashboard() {
                   fontWeight: 600,
                   fontSize: '14px'
                 }}>
-                  {lead.name.split(' ').map((n: any) => n[0]).join('')}
+                  {lead.name.split(/\s+/).filter(Boolean).map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)}
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -273,7 +279,15 @@ export default function Dashboard() {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2px' }}>
                     <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{lead.source}</span>
-                    <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>New</span>
+                    <span style={{ 
+                      fontSize: '11px', 
+                      fontWeight: 700, 
+                      color: lead.status?.color || 'var(--text-muted)',
+                      background: `${lead.status?.color || '#888'}15`,
+                      padding: '2px 8px',
+                      borderRadius: '10px',
+                      border: `1px solid ${lead.status?.color || '#888'}20`
+                    }}>{lead.status?.name || 'New Lead'}</span>
                   </div>
                 </div>
               </div>

@@ -18,38 +18,94 @@ export async function GET(req: Request) {
       whereClause.assignedTo = userId;
     }
 
-    // 1. Core Summary Stats
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+
+    // 1. Core Summary Stats (All time)
     const totalLeads = await prisma.lead.count({ where: whereClause });
 
-    
-    // Converted leads (assuming "Converted" or "Won" in name)
     const convertedLeads = await prisma.lead.count({
       where: {
         ...whereClause,
-        status: {
-          name: { in: ["Converted", "Won"] }
-        }
+        status: { name: { in: ["Converted", "Won"] } }
       }
     });
 
-    const lostLeads = await prisma.lead.count({
+    const activePotential = await prisma.lead.aggregate({
       where: {
         ...whereClause,
-        status: {
-          name: { in: ["Lost", "Rejected"] }
-        }
-      }
+        status: { name: { notIn: ["Converted", "Won", "Lost", "Rejected"] } }
+      },
+      _sum: { potential: true }
+    });
+
+    const wonRevenue = await prisma.lead.aggregate({
+      where: {
+        ...whereClause,
+        status: { name: { in: ["Converted", "Won"] } }
+      },
+      _sum: { potential: true }
     });
 
     const myTasksCount = userId ? await prisma.task.count({
       where: { assignedTo: userId, completed: false }
     }) : 0;
 
+    // 2. Trend Calculations (Last 7 days vs Previous 7 days)
+    const currentLeads = await prisma.lead.count({
+      where: { ...whereClause, createdAt: { gte: sevenDaysAgo } }
+    });
+    const previousLeads = await prisma.lead.count({
+      where: { ...whereClause, createdAt: { gte: fourteenDaysAgo, lt: sevenDaysAgo } }
+    });
 
-    // 2. Lead Acquisition (Last 7 days)
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const currentConverted = await prisma.lead.count({
+      where: { 
+        ...whereClause, 
+        updatedAt: { gte: sevenDaysAgo },
+        status: { name: { in: ["Converted", "Won"] } }
+      }
+    });
+    const previousConverted = await prisma.lead.count({
+      where: { 
+        ...whereClause, 
+        updatedAt: { gte: fourteenDaysAgo, lt: sevenDaysAgo },
+        status: { name: { in: ["Converted", "Won"] } }
+      }
+    });
 
+    const currentRevenue = await prisma.lead.aggregate({
+      where: { 
+        ...whereClause, 
+        createdAt: { gte: sevenDaysAgo },
+        status: { name: { notIn: ["Lost", "Rejected"] } }
+      },
+      _sum: { potential: true }
+    });
+    const previousRevenue = await prisma.lead.aggregate({
+      where: { 
+        ...whereClause, 
+        createdAt: { gte: fourteenDaysAgo, lt: sevenDaysAgo },
+        status: { name: { notIn: ["Lost", "Rejected"] } }
+      },
+      _sum: { potential: true }
+    });
+
+    const calculateTrend = (current: number, previous: number) => {
+      if (previous === 0) return current > 0 ? "+100%" : "0%";
+      const diff = ((current - previous) / previous) * 100;
+      return `${diff > 0 ? '+' : ''}${diff.toFixed(0)}%`;
+    };
+
+    const trends = {
+      leadsTrend: calculateTrend(currentLeads, previousLeads),
+      conversionTrend: calculateTrend(currentConverted, previousConverted),
+      revenueTrend: calculateTrend(currentRevenue._sum.potential || 0, previousRevenue._sum.potential || 0),
+      tasksTrend: "Stable" // Simplified for now
+    };
+
+    // 3. Lead Acquisition (Chronological 7 days)
     const recentLeads = await prisma.lead.groupBy({
       by: ['createdAt'],
       where: {
@@ -59,52 +115,29 @@ export async function GET(req: Request) {
       _count: true
     });
 
-    // Group by day for the chart
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const acquisitionData = days.map((day, index) => {
-      // Find leads for this specific day of the week
+    const acquisitionData = Array.from({ length: 7 }).map((_, i) => {
+      const date = new Date(now.getTime() - (6 - i) * 24 * 60 * 60 * 1000);
+      const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
       const count = recentLeads
-        .filter(l => new Date(l.createdAt).getDay() === index)
+        .filter(l => new Date(l.createdAt).toDateString() === date.toDateString())
         .reduce((sum, item) => sum + item._count, 0);
       
-      return { name: day, leads: count };
+      return { name: dayName, leads: count, date: date.toISOString().split('T')[0] };
     });
 
-    // 3. Source Distribution
+    // 4. Staff Performance & Distributions (for future use)
     const sourceStats = await prisma.lead.groupBy({
       by: ['source'],
       where: whereClause,
       _count: true
     });
 
-    // 4. Status Distribution
     const statusStats = await prisma.lead.groupBy({
       by: ['statusId'],
       where: whereClause,
       _count: true
     });
 
-    // 5. Revenue tracking (Potential)
-    const revenueStats = await prisma.lead.aggregate({
-      where: {
-        ...whereClause,
-        status: {
-          name: { in: ["Converted", "Won"] }
-        }
-      },
-      _sum: {
-        potential: true
-      }
-    });
-
-
-    const totalPotential = await prisma.lead.aggregate({
-      _sum: {
-        potential: true
-      }
-    });
-
-    // 6. Sales Team Performance
     const staffPerformance = await prisma.user.findMany({
       where: { role: "SALES" },
       select: {
@@ -116,9 +149,7 @@ export async function GET(req: Request) {
           }
         },
         leads: {
-          where: {
-            status: { name: { in: ["Converted", "Won"] } }
-          },
+          where: { status: { name: { in: ["Converted", "Won"] } } },
           select: { potential: true }
         }
       }
@@ -135,18 +166,18 @@ export async function GET(req: Request) {
       summary: {
         totalLeads,
         convertedLeads,
-        lostLeads,
         conversionRate: totalLeads > 0 ? ((convertedLeads / totalLeads) * 100).toFixed(1) : 0,
-        currentRevenue: revenueStats._sum.potential || 0,
-        totalPotential: totalPotential._sum.potential || 0
+        activePotential: activePotential._sum.potential || 0,
+        wonRevenue: wonRevenue._sum.potential || 0,
+        currentRevenue: activePotential._sum.potential || 0 // For backward compatibility with frontend
       },
+      trends,
       acquisitionData,
       sourceStats,
       statusStats,
       staffData,
       myTasksCount
     });
-
 
   } catch (error) {
     console.error("[STATS_GET]", error);

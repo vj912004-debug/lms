@@ -286,7 +286,7 @@ export default function LeadDetail({ lead, onUpdate }: LeadDetailProps) {
             fontSize: '32px',
             fontWeight: 800
           }}>
-            {lead.name.split(' ').map((n: string) => n[0]).join('')}
+            {lead.name.split(/\s+/).filter(Boolean).map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             {isEditing ? (

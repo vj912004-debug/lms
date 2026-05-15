@@ -14,6 +14,7 @@ export async function GET(req: Request) {
     const statusId = searchParams.get("statusId");
     const source = searchParams.get("source");
     const query = searchParams.get("query");
+    const limit = searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : undefined;
 
     const where: any = {};
 
@@ -43,7 +44,8 @@ export async function GET(req: Request) {
         agent: true, 
         tags: true 
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      take: limit
     });
 
     return NextResponse.json(leads);
