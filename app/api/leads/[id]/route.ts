@@ -55,6 +55,12 @@ export async function PATCH(
         assignedTo,
         followUpDate: followUpDate ? new Date(followUpDate) : undefined,
       } as any,
+      include: {
+        status: true,
+        agent: true,
+        tags: true,
+        tasks: true,
+      }
     });
 
     // If follow-up date is set, create a notification

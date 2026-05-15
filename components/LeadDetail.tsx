@@ -1,10 +1,10 @@
-import { Phone, Mail, Globe, MapPin, Calendar, Clock, Star, MessageSquare, UserPlus, Layers, Trash2 } from "lucide-react";
+import { Phone, Mail, Globe, MapPin, Calendar, Clock, Star, MessageSquare, UserPlus, Layers, Trash2, Edit3, Check, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
 interface LeadDetailProps {
   lead: any;
-  onUpdate?: () => void;
+  onUpdate?: (data?: any) => void;
 }
 
 export default function LeadDetail({ lead, onUpdate }: LeadDetailProps) {
@@ -20,6 +20,14 @@ export default function LeadDetail({ lead, onUpdate }: LeadDetailProps) {
   const [showFollowUpModal, setShowFollowUpModal] = useState(false);
   const [pendingStageId, setPendingStageId] = useState<string | null>(null);
   const [followUpDate, setFollowUpDate] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editData, setEditData] = useState({
+    name: lead?.name || "",
+    email: lead?.email || "",
+    phone: lead?.phone || "",
+    company: lead?.company || "",
+  });
 
   const fetchActivities = async () => {
     try {
@@ -43,7 +51,14 @@ export default function LeadDetail({ lead, onUpdate }: LeadDetailProps) {
       .then(data => setStages(data));
     
     fetchActivities();
-  }, [lead.id]);
+    
+    setEditData({
+      name: lead?.name || "",
+      email: lead?.email || "",
+      phone: lead?.phone || "",
+      company: lead?.company || "",
+    });
+  }, [lead.id, lead]);
 
   const logComm = async (type: string) => {
     try {
@@ -70,8 +85,9 @@ export default function LeadDetail({ lead, onUpdate }: LeadDetailProps) {
       });
 
       if (response.ok) {
+        const data = await response.json();
         toast.success("Lead reassigned successfully");
-        if (onUpdate) onUpdate();
+        if (onUpdate) onUpdate(data);
       } else {
         toast.error("Failed to reassign lead");
       }
@@ -105,8 +121,9 @@ export default function LeadDetail({ lead, onUpdate }: LeadDetailProps) {
       });
 
       if (response.ok) {
+        const data = await response.json();
         toast.success("Lead stage updated");
-        if (onUpdate) onUpdate();
+        if (onUpdate) onUpdate(data);
         setShowFollowUpModal(false);
         setPendingStageId(null);
         setFollowUpDate("");
@@ -142,6 +159,44 @@ export default function LeadDetail({ lead, onUpdate }: LeadDetailProps) {
     } finally {
       setIsAddingNote(false);
     }
+  };
+
+  const handleSave = async () => {
+    if (!editData.name.trim()) {
+      toast.error("Name is required");
+      return;
+    }
+    setIsSaving(true);
+    try {
+      const response = await fetch(`/api/leads/${lead.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast.success("Lead updated successfully");
+        setIsEditing(false);
+        if (onUpdate) onUpdate(data);
+      } else {
+        toast.error("Failed to update lead");
+      }
+    } catch (error) {
+      toast.error("An error occurred");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setEditData({
+      name: lead.name,
+      email: lead.email,
+      phone: lead.phone,
+      company: lead.company,
+    });
+    setIsEditing(false);
   };
 
   const handleDelete = async () => {
@@ -217,8 +272,8 @@ export default function LeadDetail({ lead, onUpdate }: LeadDetailProps) {
         </div>
       )}
       {/* Profile Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flex: 1, minWidth: 0 }}>
           <div style={{ 
             width: '80px', 
             height: '80px', 
@@ -233,8 +288,47 @@ export default function LeadDetail({ lead, onUpdate }: LeadDetailProps) {
           }}>
             {lead.name.split(' ').map((n: string) => n[0]).join('')}
           </div>
-          <div>
-            <h2 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '4px' }}>{lead.name}</h2>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {isEditing ? (
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '8px' }}>
+                <input 
+                  className="input"
+                  style={{ 
+                    fontSize: '24px', 
+                    fontWeight: 800, 
+                    background: 'rgba(255,255,255,0.08)', 
+                    border: '1px solid var(--primary)', 
+                    padding: '8px 16px',
+                    flex: 1,
+                    minWidth: 0
+                  }}
+                  value={editData.name}
+                  onChange={(e) => setEditData({...editData, name: e.target.value})}
+                  autoFocus
+                />
+                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                  <button 
+                    onClick={handleSave}
+                    className="icon-btn" 
+                    style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', width: '40px', height: '40px' }}
+                    title="Save Changes"
+                    disabled={isSaving}
+                  >
+                    {isSaving ? <div className="spinner" style={{ width: '18px', height: '18px' }}></div> : <Check size={20} />}
+                  </button>
+                  <button 
+                    onClick={handleCancel}
+                    className="icon-btn" 
+                    style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', width: '40px', height: '40px' }}
+                    title="Cancel"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <h2 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lead.name}</h2>
+            )}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span style={{ 
                 padding: '4px 10px', 
@@ -255,48 +349,66 @@ export default function LeadDetail({ lead, onUpdate }: LeadDetailProps) {
           </div>
         </div>
         
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button 
-            onClick={() => {
-              logComm("WHATSAPP");
-              window.open(`https://wa.me/${lead.phone?.replace(/\D/g, '')}`, '_blank');
-            }}
-            className="icon-btn" 
-            style={{ background: 'rgba(37, 211, 102, 0.1)', color: '#25D366' }}
-            title="WhatsApp"
-          >
-            <MessageSquare size={20} />
-          </button>
-          <button 
-            onClick={() => {
-              logComm("CALL");
-              window.location.href = `tel:${lead.phone}`;
-            }}
-            className="icon-btn" 
-            style={{ background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)' }}
-            title="Call"
-          >
-            <Phone size={20} />
-          </button>
-          <button 
-            onClick={() => {
-              logComm("EMAIL");
-              window.location.href = `mailto:${lead.email}`;
-            }}
-            className="icon-btn" 
-            style={{ background: 'rgba(255, 255, 255, 0.05)', color: 'white' }}
-            title="Email"
-          >
-            <Mail size={20} />
-          </button>
-          <button 
-            onClick={handleDelete}
-            className="icon-btn" 
-            style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}
-            title="Delete Lead"
-          >
-            <Trash2 size={20} />
-          </button>
+        <div style={{ display: 'flex', gap: '8px', flexShrink: 0, marginTop: '8px' }}>
+          {!isEditing && (
+            <button 
+              onClick={() => setIsEditing(true)}
+              className="icon-btn" 
+              style={{ background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)' }}
+              title="Edit Lead"
+            >
+              <Edit3 size={20} />
+            </button>
+          )}
+          {!isEditing && (
+            <button 
+              onClick={() => {
+                logComm("WHATSAPP");
+                window.open(`https://wa.me/${lead.phone?.replace(/\D/g, '')}`, '_blank');
+              }}
+              className="icon-btn" 
+              style={{ background: 'rgba(37, 211, 102, 0.1)', color: '#25D366' }}
+              title="WhatsApp"
+            >
+              <MessageSquare size={20} />
+            </button>
+          )}
+          {!isEditing && (
+            <button 
+              onClick={() => {
+                logComm("CALL");
+                window.location.href = `tel:${lead.phone}`;
+              }}
+              className="icon-btn" 
+              style={{ background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)' }}
+              title="Call"
+            >
+              <Phone size={20} />
+            </button>
+          )}
+          {!isEditing && (
+            <button 
+              onClick={() => {
+                logComm("EMAIL");
+                window.location.href = `mailto:${lead.email}`;
+              }}
+              className="icon-btn" 
+              style={{ background: 'rgba(255, 255, 255, 0.05)', color: 'white' }}
+              title="Email"
+            >
+              <Mail size={20} />
+            </button>
+          )}
+          {!isEditing && (
+            <button 
+              onClick={handleDelete}
+              className="icon-btn" 
+              style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}
+              title="Delete Lead"
+            >
+              <Trash2 size={20} />
+            </button>
+          )}
         </div>
 
       </div>
@@ -329,15 +441,42 @@ export default function LeadDetail({ lead, onUpdate }: LeadDetailProps) {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
             <div className="info-box">
               <div className="info-label"><Mail size={14} /> Email</div>
-              <div className="info-value">{lead.email || 'N/A'}</div>
+              {isEditing ? (
+                <input 
+                  className="input"
+                  style={{ height: '40px', padding: '0 12px', background: 'rgba(255,255,255,0.05)', marginTop: '4px' }}
+                  value={editData.email}
+                  onChange={(e) => setEditData({...editData, email: e.target.value})}
+                />
+              ) : (
+                <div className="info-value">{lead.email || 'N/A'}</div>
+              )}
             </div>
             <div className="info-box">
               <div className="info-label"><Phone size={14} /> Phone</div>
-              <div className="info-value">{lead.phone || 'N/A'}</div>
+              {isEditing ? (
+                <input 
+                  className="input"
+                  style={{ height: '40px', padding: '0 12px', background: 'rgba(255,255,255,0.05)', marginTop: '4px' }}
+                  value={editData.phone}
+                  onChange={(e) => setEditData({...editData, phone: e.target.value})}
+                />
+              ) : (
+                <div className="info-value">{lead.phone || 'N/A'}</div>
+              )}
             </div>
             <div className="info-box">
               <div className="info-label"><Globe size={14} /> Company</div>
-              <div className="info-value">{lead.company || 'N/A'}</div>
+              {isEditing ? (
+                <input 
+                  className="input"
+                  style={{ height: '40px', padding: '0 12px', background: 'rgba(255,255,255,0.05)', marginTop: '4px' }}
+                  value={editData.company}
+                  onChange={(e) => setEditData({...editData, company: e.target.value})}
+                />
+              ) : (
+                <div className="info-value">{lead.company || 'N/A'}</div>
+              )}
             </div>
             <div className="info-box">
               <div className="info-label"><Calendar size={14} /> Created</div>
@@ -360,9 +499,9 @@ export default function LeadDetail({ lead, onUpdate }: LeadDetailProps) {
                     style={{ width: '100%', height: '40px' }}
                     value={lead.assignedTo || ""}
                     onChange={(e) => handleReassign(e.target.value)}
-                    disabled={isAssigning}
+                    disabled={isAssigning || users.length === 0}
                   >
-                    <option value="" disabled>Select an agent...</option>
+                    <option value="" disabled>{users.length === 0 ? "Loading agents..." : "Select an agent..."}</option>
                     {users.map(user => (
                       <option key={user.id} value={user.id}>{user.name} ({user.role})</option>
                     ))}
@@ -384,9 +523,9 @@ export default function LeadDetail({ lead, onUpdate }: LeadDetailProps) {
                     style={{ width: '100%', height: '40px' }}
                     value={lead.statusId || ""}
                     onChange={(e) => handleStageUpdate(e.target.value)}
-                    disabled={isUpdatingStage}
+                    disabled={isUpdatingStage || stages.length === 0}
                   >
-                    <option value="" disabled>Change stage...</option>
+                    <option value="" disabled>{stages.length === 0 ? "Loading stages..." : "Change stage..."}</option>
                     {stages.map(stage => (
                       <option key={stage.id} value={stage.id}>{stage.name}</option>
                     ))}

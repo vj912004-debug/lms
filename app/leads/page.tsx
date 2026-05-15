@@ -92,7 +92,13 @@ export default function LeadsPage() {
         onClose={() => setSelectedLead(null)} 
         title="Lead Details"
       >
-        <LeadDetail lead={selectedLead} />
+        <LeadDetail 
+          lead={selectedLead} 
+          onUpdate={(updated) => {
+            fetchLeads();
+            if (updated) setSelectedLead(updated);
+          }}
+        />
       </Modal>
 
 

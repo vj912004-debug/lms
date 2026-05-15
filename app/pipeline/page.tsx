@@ -78,16 +78,9 @@ export default function PipelinePage() {
       >
         <LeadDetail 
           lead={selectedLead} 
-          onUpdate={() => {
+          onUpdate={(updated) => {
             fetchPipeline();
-            // We don't close here so user can keep working
-            // but we might need to refresh selectedLead
-            const refreshLead = async () => {
-              const res = await fetch(`/api/leads/${selectedLead.id}`);
-              const data = await res.json();
-              setSelectedLead(data);
-            };
-            refreshLead();
+            if (updated) setSelectedLead(updated);
           }} 
         />
       </Modal>

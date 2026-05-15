@@ -133,7 +133,13 @@ export default function Dashboard() {
       </Modal>
 
       <Modal isOpen={!!selectedLead} onClose={() => setSelectedLead(null)} title="Lead Details">
-        <LeadDetail lead={selectedLead} />
+        <LeadDetail 
+          lead={selectedLead} 
+          onUpdate={(updated) => {
+            if (user) fetchData(user);
+            if (updated) setSelectedLead(updated);
+          }}
+        />
       </Modal>
 
       {/* Stats Grid */}
