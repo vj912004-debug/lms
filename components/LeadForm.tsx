@@ -95,11 +95,8 @@ export default function LeadForm({ onSuccess, onCancel, initialStageId }: LeadFo
           value={formData.source}
           onChange={(e) => setFormData({...formData, source: e.target.value})}
         >
-          <option value="Website">Website</option>
-          <option value="Facebook">Facebook</option>
-          <option value="Google">Google Ads</option>
+          <option value="Manual Entry">Manual Entry</option>
           <option value="Referral">Referral</option>
-          <option value="Manual">Manual Entry</option>
         </select>
       </div>
 

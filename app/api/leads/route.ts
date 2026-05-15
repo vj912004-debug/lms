@@ -67,7 +67,7 @@ export async function POST(req: Request) {
         email,
         phone,
         company,
-        source: source || "API",
+        source: source || "Manual Entry",
         notes,
         score,
         statusId: newLeadStage.id,

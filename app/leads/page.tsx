@@ -212,10 +212,8 @@ export default function LeadsPage() {
               style={{ background: 'none', border: 'none', color: 'white', fontSize: '13px', outline: 'none', cursor: 'pointer' }}
             >
               <option value="">All Sources</option>
-              <option value="Facebook" style={{ background: '#1e293b' }}>Facebook</option>
-              <option value="Website" style={{ background: '#1e293b' }}>Website</option>
-              <option value="Referral" style={{ background: '#1e293b' }}>Referral</option>
               <option value="Manual Entry" style={{ background: '#1e293b' }}>Manual Entry</option>
+              <option value="Referral" style={{ background: '#1e293b' }}>Referral</option>
             </select>
           </div>
 
